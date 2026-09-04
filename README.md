@@ -40,6 +40,8 @@ Open [http://localhost:3000](http://localhost:3000).
 
 Without Stripe keys, checkout completes through the demo payment adapter and still writes the ticket + commission ledger. Mux and LiveKit adapters activate when their secrets are present.
 
+Producers can upload a poster, trailer, and movie file, or paste a stream URL. Ticket holders receive 24-hour, 1-hour, 15-minute, starting, and post-premiere reminders as they browse.
+
 ## Tests
 
 ```bash

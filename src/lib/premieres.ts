@@ -10,6 +10,7 @@ import {
 } from "./lifecycle";
 import { notifyTicketPurchase } from "./adapters/notifications";
 import { writeAudit } from "./audit";
+import { dispatchReminders } from "./reminders";
 
 export async function getSettings() {
   return db.platformSettings.upsert({
@@ -122,6 +123,8 @@ export async function listDiscoverPremieres(
     orderBy: { scheduledAt: "asc" },
   });
 
+  void dispatchReminders().catch(() => undefined);
+
   const tickets = userId
     ? await db.ticket.findMany({
         where: { userId, status: { in: ["PAID", "USED"] } },
@@ -154,6 +157,7 @@ export async function getPremiereForUser(id: string, userId?: string) {
     include: premiereInclude,
   });
   if (!premiere) return null;
+  void dispatchReminders().catch(() => undefined);
 
   const liveStatus = resolvePremiereStatus(premiere);
   if (premiere.status !== liveStatus && premiere.status !== "DRAFT" && premiere.status !== "ARCHIVED") {

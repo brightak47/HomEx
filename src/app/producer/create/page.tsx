@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PhoneShell } from "@/components/shell";
+import { FileUpload } from "@/components/file-upload";
 import { api } from "@/lib/api";
 import { estimateEarnings } from "@/lib/commission";
 import { formatMoney, parsePriceToCents } from "@/lib/money";
@@ -18,6 +19,7 @@ export default function CreatePremierePage() {
   const router = useRouter();
   const [step, setStep] = useState(0);
   const [error, setError] = useState("");
+  const [busy, setBusy] = useState(false);
   const [form, setForm] = useState({
     title: "",
     description: "",
@@ -28,7 +30,8 @@ export default function CreatePremierePage() {
     movieAssetUrl: sampleVideo,
     director: "",
     country: "US",
-          scheduledAt: new Date(Date.now() + 36 * 60 * 60_000).toISOString().slice(0, 16),
+    castNames: "",
+    scheduledAt: new Date(Date.now() + 36 * 60 * 60_000).toISOString().slice(0, 16),
     timezone: "America/New_York",
     durationMinutes: 120,
     ticketPrice: "10",
@@ -55,26 +58,47 @@ export default function CreatePremierePage() {
     setForm((current) => ({ ...current, ...partial }));
   }
 
-  async function publish() {
+  function payload(publish: boolean) {
+    return {
+      title: form.title,
+      description: form.description,
+      genre: form.genre,
+      runtimeMinutes: Number(form.runtimeMinutes),
+      posterUrl: form.posterUrl,
+      trailerUrl: form.trailerUrl,
+      movieAssetUrl: form.movieAssetUrl,
+      director: form.director,
+      country: form.country,
+      scheduledAt: new Date(form.scheduledAt).toISOString(),
+      timezone: form.timezone,
+      durationMinutes: Number(form.durationMinutes),
+      ticketPrice: form.ticketPrice,
+      currency: form.currency,
+      cast: form.castNames
+        .split(",")
+        .map((name) => name.trim())
+        .filter(Boolean)
+        .map((name) => ({ name, role: "Cast" })),
+      guests: form.guestEmail
+        ? [{ name: form.guestName, email: form.guestEmail, guestRole: form.guestRole }]
+        : [],
+      publish,
+    };
+  }
+
+  async function submit(publish: boolean) {
     setError("");
+    setBusy(true);
     try {
       const premiere = await api<{ premiere: { id: string } }>("/api/premieres", {
         method: "POST",
-        body: JSON.stringify({
-          ...form,
-          scheduledAt: new Date(form.scheduledAt).toISOString(),
-          runtimeMinutes: Number(form.runtimeMinutes),
-          durationMinutes: Number(form.durationMinutes),
-          ticketPrice: form.ticketPrice,
-          guests: form.guestEmail
-            ? [{ name: form.guestName, email: form.guestEmail, guestRole: form.guestRole }]
-            : [],
-          publish: true,
-        }),
+        body: JSON.stringify(payload(publish)),
       });
       router.push(`/producer/premieres/${premiere.premiere.id}`);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Could not publish");
+      setError(err instanceof Error ? err.message : "Could not save premiere");
+    } finally {
+      setBusy(false);
     }
   }
 
@@ -91,10 +115,11 @@ export default function CreatePremierePage() {
             <textarea className="field min-h-28" placeholder="Short description" value={form.description} onChange={(e) => update({ description: e.target.value })} />
             <input className="field" placeholder="Genre" value={form.genre} onChange={(e) => update({ genre: e.target.value })} />
             <input className="field" placeholder="Director" value={form.director} onChange={(e) => update({ director: e.target.value })} />
+            <input className="field" placeholder="Cast names, comma separated" value={form.castNames} onChange={(e) => update({ castNames: e.target.value })} />
             <input className="field" type="number" placeholder="Runtime minutes" value={form.runtimeMinutes} onChange={(e) => update({ runtimeMinutes: Number(e.target.value) })} />
-            <input className="field" placeholder="Poster URL" value={form.posterUrl} onChange={(e) => update({ posterUrl: e.target.value })} />
-            <input className="field" placeholder="Trailer URL" value={form.trailerUrl} onChange={(e) => update({ trailerUrl: e.target.value })} />
-            <input className="field" placeholder="Movie file / stream URL" value={form.movieAssetUrl} onChange={(e) => update({ movieAssetUrl: e.target.value })} />
+            <FileUpload label="Poster" accept="image/*" value={form.posterUrl} onChange={(posterUrl) => update({ posterUrl })} />
+            <FileUpload label="Trailer" accept="video/*" value={form.trailerUrl} onChange={(trailerUrl) => update({ trailerUrl })} />
+            <FileUpload label="Premiere movie" accept="video/*" value={form.movieAssetUrl} onChange={(movieAssetUrl) => update({ movieAssetUrl })} />
           </>
         )}
         {step === 1 && (
@@ -136,7 +161,9 @@ export default function CreatePremierePage() {
           <div className="space-y-3 rounded-3xl border border-white/10 p-4">
             <img src={form.posterUrl} alt="" className="h-48 w-full rounded-2xl object-cover" />
             <p className="display text-2xl">{form.title || "Untitled"}</p>
-            <p className="text-sm text-muted">{form.scheduledAt || "Date pending"} · {formatMoney(Number(form.ticketPrice || 0) * 100)}</p>
+            <p className="text-sm text-muted">
+              {form.scheduledAt || "Date pending"} · {formatMoney(Number(form.ticketPrice || 0) * 100)}
+            </p>
             <p className="text-sm text-gold-soft">{form.guestName ? `Watch with ${form.guestName}` : "No guests yet"}</p>
           </div>
         )}
@@ -153,9 +180,14 @@ export default function CreatePremierePage() {
             Continue
           </button>
         ) : (
-          <button className="gold-btn flex-1 py-3" onClick={() => void publish()}>
-            Publish Premiere
-          </button>
+          <>
+            <button className="ghost-btn flex-1 py-3" disabled={busy} onClick={() => void submit(false)}>
+              Save draft
+            </button>
+            <button className="gold-btn flex-1 py-3" disabled={busy} onClick={() => void submit(true)}>
+              {busy ? "Publishing…" : "Publish Premiere"}
+            </button>
+          </>
         )}
       </div>
     </PhoneShell>

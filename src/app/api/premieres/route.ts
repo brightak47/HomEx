@@ -1,5 +1,5 @@
 import { z } from "zod";
-import { jsonError, requireRole } from "@/lib/auth";
+import { getSession, jsonError, requireRole } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { listDiscoverPremieres } from "@/lib/premieres";
 import { writeAudit } from "@/lib/audit";
@@ -31,11 +31,15 @@ const createSchema = z.object({
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
-  const premieres = await listDiscoverPremieres({
-    genre: url.searchParams.get("genre") ?? undefined,
-    country: url.searchParams.get("country") ?? undefined,
-    q: url.searchParams.get("q") ?? undefined,
-  });
+  const session = await getSession();
+  const premieres = await listDiscoverPremieres(
+    {
+      genre: url.searchParams.get("genre") ?? undefined,
+      country: url.searchParams.get("country") ?? undefined,
+      q: url.searchParams.get("q") ?? undefined,
+    },
+    session?.id,
+  );
   return Response.json({ premieres });
 }
 

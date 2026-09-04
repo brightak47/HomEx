@@ -14,10 +14,10 @@ export function SwipeDeck({ premieres }: { premieres: PremiereCard[] }) {
   const [index, setIndex] = useState(0);
   const [offset, setOffset] = useState(0);
   const [dragging, setDragging] = useState(false);
+  const [trailerOpen, setTrailerOpen] = useState(false);
   const startX = useRef(0);
   const current = premieres[index];
   const next = premieres[index + 1];
-
   const rotation = useMemo(() => offset / 28, [offset]);
 
   if (!current) {
@@ -25,6 +25,9 @@ export function SwipeDeck({ premieres }: { premieres: PremiereCard[] }) {
       <div className="flex min-h-[80dvh] flex-col items-center justify-center px-8 text-center">
         <p className="display text-2xl text-gold-soft">That&apos;s the reel</p>
         <p className="mt-3 text-muted">New premieres will appear here as producers publish.</p>
+        <Link href="/search" className="gold-btn mt-6 px-6 py-3">
+          Search premieres
+        </Link>
       </div>
     );
   }
@@ -36,6 +39,7 @@ export function SwipeDeck({ premieres }: { premieres: PremiereCard[] }) {
         body: JSON.stringify({ premiereId: current.id }),
       }).catch(() => undefined);
     }
+    setTrailerOpen(false);
     setOffset(direction === "right" ? 520 : -520);
     window.setTimeout(() => {
       setIndex((value) => value + 1);
@@ -63,6 +67,7 @@ export function SwipeDeck({ premieres }: { premieres: PremiereCard[] }) {
           transition: dragging ? "none" : "transform 220ms ease",
         }}
         onPointerDown={(event) => {
+          if (trailerOpen) return;
           setDragging(true);
           startX.current = event.clientX;
           event.currentTarget.setPointerCapture(event.pointerId);
@@ -78,7 +83,7 @@ export function SwipeDeck({ premieres }: { premieres: PremiereCard[] }) {
           else setOffset(0);
         }}
         onClick={() => {
-          if (Math.abs(offset) < 8) router.push(`/movies/${current.id}`);
+          if (!trailerOpen && Math.abs(offset) < 8) router.push(`/movies/${current.id}`);
         }}
       >
         <img src={current.posterUrl} alt={current.title} className="h-full w-full object-cover" />
@@ -119,12 +124,32 @@ export function SwipeDeck({ premieres }: { premieres: PremiereCard[] }) {
               <p className="text-xl text-gold">{formatMoney(current.ticketPriceCents, current.currency)}</p>
             </div>
           </div>
-          <div className="mt-5 flex gap-3">
+          <div className="mt-4 flex items-center justify-center gap-6">
+            <button
+              className="ghost-btn h-12 w-12 text-lg"
+              onClick={(event) => {
+                event.stopPropagation();
+                void finish("left");
+              }}
+            >
+              ✕
+            </button>
+            <button
+              className="gold-btn h-12 w-12 text-lg"
+              onClick={(event) => {
+                event.stopPropagation();
+                void finish("right");
+              }}
+            >
+              ♥
+            </button>
+          </div>
+          <div className="mt-4 flex gap-3">
             <button
               className="ghost-btn flex-1 py-3"
               onClick={(event) => {
                 event.stopPropagation();
-                router.push(`/movies/${current.id}?trailer=1`);
+                setTrailerOpen(true);
               }}
             >
               Trailer
@@ -136,11 +161,30 @@ export function SwipeDeck({ premieres }: { premieres: PremiereCard[] }) {
                 router.push(current.canJoin ? `/premiere/${current.id}` : `/checkout/${current.id}`);
               }}
             >
-              {current.canJoin ? "Join Premiere" : "Buy Ticket"}
+              {current.canJoin ? "Join Premiere" : current.ticketStatus ? "Ticket Confirmed" : "Buy Ticket"}
             </button>
           </div>
         </div>
       </article>
+      {trailerOpen && (
+        <div
+          className="absolute inset-0 z-30 flex flex-col justify-end bg-black/80 p-5"
+          onClick={() => setTrailerOpen(false)}
+        >
+          <video
+            src={current.trailerUrl}
+            poster={current.posterUrl}
+            controls
+            autoPlay
+            playsInline
+            className="w-full rounded-3xl"
+            onClick={(event) => event.stopPropagation()}
+          />
+          <button className="gold-btn mt-4 w-full py-3" onClick={() => setTrailerOpen(false)}>
+            Close trailer
+          </button>
+        </div>
+      )}
     </div>
   );
 }

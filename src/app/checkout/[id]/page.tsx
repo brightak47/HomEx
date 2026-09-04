@@ -42,6 +42,23 @@ export default function CheckoutPage() {
 
   if (!premiere) return <PhoneShell><div className="p-8 text-muted">Preparing checkout…</div></PhoneShell>;
 
+  if (premiere.ticketStatus) {
+    return (
+      <PhoneShell>
+        <div className="px-5 pt-16 text-center">
+          <p className="text-[11px] uppercase tracking-[0.24em] text-gold">Already yours</p>
+          <h1 className="display mt-2 text-4xl">{premiere.title}</h1>
+          <button
+            className="gold-btn mt-8 w-full py-3"
+            onClick={() => router.push(premiere.canJoin ? `/premiere/${id}` : `/tickets`)}
+          >
+            {premiere.canJoin ? "Join Premiere" : "View ticket"}
+          </button>
+        </div>
+      </PhoneShell>
+    );
+  }
+
   return (
     <PhoneShell>
       <div className="px-5 pt-10">

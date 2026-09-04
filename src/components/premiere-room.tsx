@@ -38,8 +38,9 @@ export function PremiereRoom({
   const [error, setError] = useState("");
   const [messages, setMessages] = useState<{ id: string; body: string; name: string }[]>([]);
   const [draft, setDraft] = useState("");
-  const [reactions, setReactions] = useState<string[]>([]);
+  const [reactions, setReactions] = useState<{ id: number; emoji: string }[]>([]);
   const [phase, setPhase] = useState("PRE_SHOW");
+  const [tilesOpen, setTilesOpen] = useState(true);
 
   useEffect(() => {
     let cancelled = false;
@@ -51,6 +52,7 @@ export function PremiereRoom({
         if (cancelled) return;
         setJoin(payload);
         setPhase(payload.phase);
+        setTilesOpen(payload.phase !== "MOVIE");
       })
       .catch((err: Error) => setError(err.message));
     return () => {
@@ -91,10 +93,6 @@ export function PremiereRoom({
         `/api/premieres/${premiereId}/chat`,
       );
       setMessages(chat.messages);
-      const live = await api<{ reactions: { emoji: string }[] }>(
-        `/api/premieres/${premiereId}/reactions`,
-      );
-      setReactions(live.reactions.map((item) => item.emoji));
     }, 2500);
 
     return () => {
@@ -105,19 +103,20 @@ export function PremiereRoom({
 
   async function sendChat() {
     if (!draft.trim()) return;
+    const body = draft;
+    setDraft("");
     await api(`/api/premieres/${premiereId}/chat`, {
       method: "POST",
-      body: JSON.stringify({ body: draft }),
+      body: JSON.stringify({ body }),
     });
-    setDraft("");
   }
 
   async function react(emoji: string) {
+    setReactions((current) => [...current, { id: Date.now(), emoji }].slice(-8));
     await api(`/api/premieres/${premiereId}/reactions`, {
       method: "POST",
       body: JSON.stringify({ emoji }),
     });
-    setReactions((current) => [emoji, ...current].slice(0, 12));
   }
 
   if (error) {
@@ -134,10 +133,11 @@ export function PremiereRoom({
   }
 
   const movieOn = phase === "MOVIE";
+  const tiles = guests.length ? guests : [{ name: "Host", guestRole: "HOST" }];
 
   return (
     <div className="relative min-h-[100dvh] bg-black">
-      <div className="relative min-h-[240px] w-full overflow-hidden bg-black aspect-video">
+      <div className="relative aspect-video min-h-[240px] w-full overflow-hidden bg-black">
         {movieOn ? (
           <video
             ref={videoRef}
@@ -155,7 +155,8 @@ export function PremiereRoom({
           <img src={posterUrl} alt="" className="h-full w-full object-cover opacity-70" />
         )}
         <WatermarkOverlay label={join.watermark.label} />
-        <div className="absolute left-4 top-4 rounded-full bg-black/50 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-gold">
+        <div className="absolute left-4 top-4 flex items-center gap-2 rounded-full bg-black/50 px-3 py-1 text-[11px] uppercase tracking-[0.2em] text-gold">
+          <span className="live-dot" />
           {phase.replace("_", " ")}
         </div>
         {!movieOn && (
@@ -166,36 +167,42 @@ export function PremiereRoom({
             </p>
           </div>
         )}
+        <div className="pointer-events-none absolute inset-x-0 top-16 flex justify-center gap-3 text-2xl">
+          {reactions.map((item) => (
+            <span key={item.id}>{item.emoji}</span>
+          ))}
+        </div>
       </div>
 
       <section className="px-4 pt-4">
-        <p className="text-[11px] uppercase tracking-[0.22em] text-muted">Live watch party</p>
-        <div className="mt-3 flex gap-3 overflow-x-auto hide-scroll">
-          {(guests.length ? guests : [{ name: "Host", guestRole: "HOST" }]).map((guest) => (
-            <div key={guest.name} className="min-w-[88px]">
-              <div className="flex h-20 w-20 items-center justify-center rounded-2xl border border-gold/30 bg-[#16161d]">
-                <span className="text-lg text-gold">{guest.name.slice(0, 1)}</span>
-              </div>
-              <p className="mt-2 truncate text-xs text-cream">{guest.name}</p>
-              <p className="truncate text-[10px] uppercase tracking-[0.16em] text-muted">
-                {guest.guestRole}
-              </p>
-            </div>
-          ))}
+        <div className="flex items-center justify-between">
+          <p className="text-[11px] uppercase tracking-[0.22em] text-muted">Live watch party</p>
+          <button className="text-[11px] uppercase tracking-[0.16em] text-gold" onClick={() => setTilesOpen(!tilesOpen)}>
+            {tilesOpen ? "Minimize" : "Show guests"}
+          </button>
         </div>
+        {tilesOpen && (
+          <div className="mt-3 flex gap-3 overflow-x-auto hide-scroll">
+            {tiles.map((guest) => (
+              <div key={guest.name} className="min-w-[88px]">
+                <div className="relative flex h-20 w-20 items-center justify-center overflow-hidden rounded-2xl border border-gold/30 bg-[#16161d]">
+                  <span className="text-lg text-gold">{guest.name.slice(0, 1)}</span>
+                  <span className="live-dot absolute right-2 top-2" />
+                </div>
+                <p className="mt-2 truncate text-xs text-cream">{guest.name}</p>
+                <p className="truncate text-[10px] uppercase tracking-[0.16em] text-muted">{guest.guestRole}</p>
+              </div>
+            ))}
+          </div>
+        )}
       </section>
 
-      <section className="px-4 pb-28 pt-5">
+      <section className="px-4 pb-10 pt-5">
         <div className="flex gap-2">
           {emojis.map((emoji) => (
             <button key={emoji} className="ghost-btn px-3 py-2" onClick={() => void react(emoji)}>
               {emoji}
             </button>
-          ))}
-        </div>
-        <div className="mt-2 flex gap-2 text-lg">
-          {reactions.map((emoji, index) => (
-            <span key={`${emoji}-${index}`}>{emoji}</span>
           ))}
         </div>
         <div className="mt-4 max-h-40 space-y-2 overflow-y-auto">
@@ -212,6 +219,9 @@ export function PremiereRoom({
             placeholder="Say something to the room"
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") void sendChat();
+            }}
           />
           <button className="gold-btn px-4" onClick={() => void sendChat()}>
             Send

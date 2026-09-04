@@ -40,7 +40,8 @@ export default async function ProducerHomePage() {
             <div>
               <p className="display text-lg">{premiere.title}</p>
               <p className="text-xs uppercase tracking-[0.16em] text-muted">
-                {premiere.status.replaceAll("_", " ")} · {premiere.ticketsSold} tickets
+                {premiere.status.replaceAll("_", " ")} · {premiere.ticketsSold}{" "}
+                {premiere.ticketsSold === 1 ? "ticket" : "tickets"}
               </p>
             </div>
           </Link>
