@@ -10,15 +10,12 @@ import { TrailerPlayer } from "@/components/trailer-player";
 
 export default async function MovieDetailPage({
   params,
-  searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ trailer?: string }>;
 }) {
   const user = await getSession();
   if (!user) redirect("/");
   const { id } = await params;
-  const query = await searchParams;
   const result = await getPremiereForUser(id, user.id);
   if (!result) notFound();
   const premiere = result.dto;
@@ -30,8 +27,8 @@ export default async function MovieDetailPage({
 
   return (
     <PhoneShell role={user.role}>
-      <img src={premiere.posterUrl} alt="" className="h-[420px] w-full object-cover" />
-      <div className="-mt-16 space-y-4 px-5 pb-8">
+      <img src={premiere.posterUrl} alt="" className="h-[220px] w-full object-cover" />
+      <div className="-mt-10 space-y-4 px-5 pb-8">
         <p className="text-[11px] uppercase tracking-[0.24em] text-gold">
           {premiere.genre} · {premiere.runtimeMinutes} min
         </p>
@@ -40,6 +37,13 @@ export default async function MovieDetailPage({
         <p className="text-xs uppercase tracking-[0.16em] text-muted">
           {premiere.country} · {premiere.studioName} · Dir. {premiere.director}
         </p>
+        <TrailerPlayer
+          src={premiere.trailerUrl}
+          poster={premiere.posterUrl}
+          title={premiere.title}
+          controls
+          className="aspect-video w-full rounded-3xl border-0 bg-black"
+        />
         <div className="rounded-3xl border border-white/10 bg-[#121218] p-4">
           <p className="text-[11px] uppercase tracking-[0.2em] text-gold">
             Premieres {formatShowtime(premiere.scheduledAt, premiere.timezone)}
@@ -68,15 +72,6 @@ export default async function MovieDetailPage({
               Live premiere with {premiere.guests.map((guest) => guest.name).join(", ")}
             </p>
           </div>
-        )}
-        {(query.trailer || true) && (
-          <TrailerPlayer
-            src={premiere.trailerUrl}
-            poster={premiere.posterUrl}
-            title={premiere.title}
-            controls
-            className="aspect-video w-full rounded-3xl border-0 bg-black"
-          />
         )}
         <Link href={cta.href} className="gold-btn block py-3 text-center">
           {cta.label}

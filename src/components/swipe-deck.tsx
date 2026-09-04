@@ -99,7 +99,7 @@ export function SwipeDeck({ premieres }: { premieres: PremiereCard[] }) {
             Skip
           </div>
         )}
-        <div className="absolute inset-x-0 bottom-24 px-5">
+        <div className="absolute inset-x-0 bottom-28 px-5">
           <p className="text-[11px] uppercase tracking-[0.28em] text-gold">
             Premieres {formatShowtime(current.scheduledAt, current.timezone)}
           </p>
