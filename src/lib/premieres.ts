@@ -147,6 +147,8 @@ export async function listDiscoverPremieres(
       };
       const byStatus = (rank[a.status] ?? 9) - (rank[b.status] ?? 9);
       if (byStatus !== 0) return byStatus;
+      const ghanaFirst = Number(a.country !== "GH") - Number(b.country !== "GH");
+      if (ghanaFirst !== 0) return ghanaFirst;
       return (b.attendeeCount ?? 0) - (a.attendeeCount ?? 0);
     });
 }

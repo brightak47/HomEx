@@ -29,10 +29,10 @@ export default function CreatePremierePage() {
     trailerUrl: sampleVideo,
     movieAssetUrl: sampleVideo,
     director: "",
-    country: "US",
+    country: "GH",
     castNames: "",
     scheduledAt: new Date(Date.now() + 36 * 60 * 60_000).toISOString().slice(0, 16),
-    timezone: "America/New_York",
+    timezone: "Africa/Accra",
     durationMinutes: 120,
     ticketPrice: "10",
     currency: "USD",
@@ -117,8 +117,15 @@ export default function CreatePremierePage() {
             <input className="field" placeholder="Director" value={form.director} onChange={(e) => update({ director: e.target.value })} />
             <input className="field" placeholder="Cast names, comma separated" value={form.castNames} onChange={(e) => update({ castNames: e.target.value })} />
             <input className="field" type="number" placeholder="Runtime minutes" value={form.runtimeMinutes} onChange={(e) => update({ runtimeMinutes: Number(e.target.value) })} />
+            <input className="field" placeholder="Country code (GH)" value={form.country} onChange={(e) => update({ country: e.target.value })} />
             <FileUpload label="Poster" accept="image/*" value={form.posterUrl} onChange={(posterUrl) => update({ posterUrl })} />
-            <FileUpload label="Trailer" accept="video/*" value={form.trailerUrl} onChange={(trailerUrl) => update({ trailerUrl })} />
+            <FileUpload label="Trailer file" accept="video/*" value={form.trailerUrl} onChange={(trailerUrl) => update({ trailerUrl })} />
+            <input
+              className="field"
+              placeholder="Or paste a YouTube trailer URL"
+              value={form.trailerUrl}
+              onChange={(e) => update({ trailerUrl: e.target.value })}
+            />
             <FileUpload label="Premiere movie" accept="video/*" value={form.movieAssetUrl} onChange={(movieAssetUrl) => update({ movieAssetUrl })} />
           </>
         )}

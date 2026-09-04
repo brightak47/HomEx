@@ -4,6 +4,7 @@ import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Countdown } from "./countdown";
+import { TrailerPlayer } from "@/components/trailer-player";
 import { formatShowtime } from "@/lib/datetime";
 import { formatMoney } from "@/lib/money";
 import { api } from "@/lib/api";
@@ -105,7 +106,7 @@ export function SwipeDeck({ premieres }: { premieres: PremiereCard[] }) {
           <h1 className="display mt-2 text-4xl text-cream">{current.title}</h1>
           <p className="mt-2 line-clamp-2 text-sm text-cream/80">{current.description}</p>
           <p className="mt-3 text-xs uppercase tracking-[0.18em] text-muted">
-            {current.genre} · {current.studioName}
+            {current.genre} · {current.country} · {current.studioName}
           </p>
           {current.guests.length > 0 && (
             <p className="mt-2 text-sm text-gold-soft">
@@ -171,15 +172,16 @@ export function SwipeDeck({ premieres }: { premieres: PremiereCard[] }) {
           className="absolute inset-0 z-30 flex flex-col justify-end bg-black/80 p-5"
           onClick={() => setTrailerOpen(false)}
         >
-          <video
-            src={current.trailerUrl}
-            poster={current.posterUrl}
-            controls
-            autoPlay
-            playsInline
-            className="w-full rounded-3xl"
-            onClick={(event) => event.stopPropagation()}
-          />
+          <div className="overflow-hidden rounded-3xl" onClick={(event) => event.stopPropagation()}>
+            <TrailerPlayer
+              src={current.trailerUrl}
+              poster={current.posterUrl}
+              title={current.title}
+              autoPlay
+              controls
+              className="aspect-video w-full border-0 bg-black"
+            />
+          </div>
           <button className="gold-btn mt-4 w-full py-3" onClick={() => setTrailerOpen(false)}>
             Close trailer
           </button>

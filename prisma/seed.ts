@@ -6,10 +6,17 @@ const db = new PrismaClient();
 const videos = {
   neon: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/TearsOfSteel.mp4",
   midnight: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4",
-  overture: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
-  tide: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
   iron: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4",
+  bunny: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
+  elephants: "https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4",
 };
+
+function youtubeTrailer(id: string) {
+  return {
+    trailerUrl: `https://www.youtube.com/watch?v=${id}`,
+    posterUrl: `https://i.ytimg.com/vi/${id}/hqdefault.jpg`,
+  };
+}
 
 async function main() {
   await db.reaction.deleteMany();
@@ -202,71 +209,126 @@ async function main() {
     },
   });
 
-  await db.premiere.create({
-    data: {
-      producer: { connect: { id: producer.id } },
-      scheduledAt: new Date(now.getTime() + 26 * 60 * 60_000),
-      timezone: "America/Los_Angeles",
-      durationMinutes: 110,
-      ticketPriceCents: 1299,
-      status: "TICKETS_ON_SALE",
-      publishedAt: new Date(now.getTime() - 2 * 24 * 60 * 60_000),
-      movie: {
-        create: {
-          title: "The Last Overture",
-          description:
-            "A disgraced conductor returns to Accra for one night, carrying a score that was never meant to be heard.",
-          genre: "Drama",
-          runtimeMinutes: 131,
-          posterUrl:
-            "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?auto=format&fit=crop&w=1400&q=80",
-          trailerUrl: videos.overture,
-          movieAssetUrl: videos.overture,
-          director: "Kwame Mensah",
-          country: "GH",
-          castMembers: {
-            create: [
-              { name: "David Oyelowo", role: "Kofi" },
-              { name: "Thandiwe Newton", role: "Abena" },
-            ],
-          },
-        },
-      },
+  const ghanaFilms = [
+    {
+      title: "King of Tɛma",
+      description:
+        "A crime drama from Tema about loyalty, betrayal, and redemption in Ghana’s industrial port city.",
+      genre: "Crime",
+      runtimeMinutes: 110,
+      director: "Kobina de Graft-Johnson",
+      youtubeId: "BBcEq-4q-b0",
+      movieAssetUrl: videos.bunny,
+      ticketPriceCents: 4999,
+      daysFromNow: 3,
+      cast: [
+        { name: "Fred Amugi", role: "Cast" },
+        { name: "Kweku Elliott", role: "Cast" },
+        { name: "Kingsley Yamoah", role: "Cast" },
+      ],
     },
-  });
+    {
+      title: "The Burial of Kojo",
+      description:
+        "A gifted girl travels lands between life and death to find her father after he vanishes in an abandoned gold mine.",
+      genre: "Drama",
+      runtimeMinutes: 80,
+      director: "Blitz Bazawule",
+      youtubeId: "2l7gC3fa3m0",
+      movieAssetUrl: videos.elephants,
+      ticketPriceCents: 3999,
+      daysFromNow: 7,
+      cast: [
+        { name: "Cynthia Dankwa", role: "Esi" },
+        { name: "Ama K. Abebrese", role: "Cast" },
+        { name: "Joseph Otsiman", role: "Kojo" },
+      ],
+    },
+    {
+      title: "Azali",
+      description:
+        "Amina is sent from northern Ghana to escape an arranged marriage, then must survive Accra’s slums to find her way home.",
+      genre: "Drama",
+      runtimeMinutes: 92,
+      director: "Kwabena Gyansah",
+      youtubeId: "2GAzfj-WYFs",
+      movieAssetUrl: videos.midnight,
+      ticketPriceCents: 4499,
+      daysFromNow: 12,
+      cast: [
+        { name: "Ama K. Abebrese", role: "Joan" },
+        { name: "Adjetey Anang", role: "Akatok" },
+        { name: "Emmanuel Nii Adom Quaye", role: "Quartey" },
+      ],
+    },
+    {
+      title: "Aloe Vera",
+      description:
+        "Two neighboring Ghanaian communities feud for generations until a love story forces them to choose peace.",
+      genre: "Romance",
+      runtimeMinutes: 120,
+      director: "Peter Sedufia",
+      youtubeId: "sLpfkKnF1Rs",
+      movieAssetUrl: videos.neon,
+      ticketPriceCents: 5499,
+      daysFromNow: 16,
+      cast: [
+        { name: "Priscilla Opoku-Agyeman", role: "Cast" },
+        { name: "Adjetey Anang", role: "Cast" },
+        { name: "Naa Ashorkor", role: "Cast" },
+        { name: "Nana Ama McBrown", role: "Cast" },
+      ],
+    },
+    {
+      title: "Borga",
+      description:
+        "Kojo leaves Agbogbloshie for Germany chasing the myth of the wealthy borga, then must face the life he left behind.",
+      genre: "Drama",
+      runtimeMinutes: 104,
+      director: "York-Fabian Raabe",
+      youtubeId: "-4ji4fZXuTg",
+      movieAssetUrl: videos.iron,
+      ticketPriceCents: 5999,
+      daysFromNow: 21,
+      cast: [
+        { name: "Eugene Boateng", role: "Kojo" },
+        { name: "Christiane Paul", role: "Lina" },
+        { name: "Adjetey Anang", role: "Cast" },
+      ],
+    },
+  ] as const;
 
-  await db.premiere.create({
-    data: {
-      producer: { connect: { id: producer.id } },
-      scheduledAt: new Date(now.getTime() + 5 * 24 * 60 * 60_000),
-      timezone: "Africa/Accra",
-      durationMinutes: 98,
-      ticketPriceCents: 699,
-      status: "TICKETS_ON_SALE",
-      publishedAt: new Date(now.getTime() - 24 * 60 * 60_000),
-      movie: {
-        create: {
-          title: "After the Tide",
-          description:
-            "Two strangers share a ferry home after a vanished island reappears for a single night.",
-          genre: "Romance",
-          runtimeMinutes: 106,
-          posterUrl:
-            "https://images.unsplash.com/photo-1478720568477-152d9b164e26?auto=format&fit=crop&w=1400&q=80",
-          trailerUrl: videos.tide,
-          movieAssetUrl: videos.tide,
-          director: "Sofia Mensima",
-          country: "GH",
-          castMembers: {
-            create: [
-              { name: "Michaela Coel", role: "Nia" },
-              { name: "John David Washington", role: "Seth" },
-            ],
+  for (const film of ghanaFilms) {
+    const trailer = youtubeTrailer(film.youtubeId);
+    await db.premiere.create({
+      data: {
+        producer: { connect: { id: producer.id } },
+        scheduledAt: new Date(now.getTime() + film.daysFromNow * 24 * 60 * 60_000),
+        timezone: "Africa/Accra",
+        durationMinutes: film.runtimeMinutes,
+        ticketPriceCents: film.ticketPriceCents,
+        currency: "GHS",
+        status: "TICKETS_ON_SALE",
+        publishedAt: new Date(now.getTime() - 24 * 60 * 60_000),
+        movie: {
+          create: {
+            title: film.title,
+            description: film.description,
+            genre: film.genre,
+            runtimeMinutes: film.runtimeMinutes,
+            posterUrl: trailer.posterUrl,
+            trailerUrl: trailer.trailerUrl,
+            movieAssetUrl: film.movieAssetUrl,
+            director: film.director,
+            country: "GH",
+            castMembers: {
+              create: [...film.cast],
+            },
           },
         },
       },
-    },
-  });
+    });
+  }
 
   await db.premiere.create({
     data: {

@@ -6,6 +6,7 @@ import { PhoneShell } from "@/components/shell";
 import { Countdown } from "@/components/countdown";
 import { formatShowtime } from "@/lib/datetime";
 import { formatMoney } from "@/lib/money";
+import { TrailerPlayer } from "@/components/trailer-player";
 
 export default async function MovieDetailPage({
   params,
@@ -37,7 +38,7 @@ export default async function MovieDetailPage({
         <h1 className="display text-4xl">{premiere.title}</h1>
         <p className="text-sm text-cream/80">{premiere.description}</p>
         <p className="text-xs uppercase tracking-[0.16em] text-muted">
-          {premiere.studioName} · Dir. {premiere.director}
+          {premiere.country} · {premiere.studioName} · Dir. {premiere.director}
         </p>
         <div className="rounded-3xl border border-white/10 bg-[#121218] p-4">
           <p className="text-[11px] uppercase tracking-[0.2em] text-gold">
@@ -69,12 +70,12 @@ export default async function MovieDetailPage({
           </div>
         )}
         {(query.trailer || true) && (
-          <video
+          <TrailerPlayer
             src={premiere.trailerUrl}
-            controls
-            playsInline
             poster={premiere.posterUrl}
-            className="w-full rounded-3xl"
+            title={premiere.title}
+            controls
+            className="aspect-video w-full rounded-3xl border-0 bg-black"
           />
         )}
         <Link href={cta.href} className="gold-btn block py-3 text-center">

@@ -13,7 +13,17 @@ export default async function SearchPage({
   const user = await getSession();
   if (!user) redirect("/");
   const filters = await searchParams;
-  const premieres = await listDiscoverPremieres(filters, user.id);
+  const country = filters.country ?? "GH";
+  const premieres = await listDiscoverPremieres(
+    { ...filters, country: country || undefined },
+    user.id,
+  );
+  const chips = [
+    { label: "Ghana", value: "GH" },
+    { label: "All", value: "" },
+    { label: "US", value: "US" },
+    { label: "UK", value: "GB" },
+  ];
 
   return (
     <PhoneShell role={user.role}>
@@ -23,7 +33,26 @@ export default async function SearchPage({
         <input className="field" name="q" defaultValue={filters.q} placeholder="Title" />
         <div className="grid grid-cols-2 gap-3">
           <input className="field" name="genre" defaultValue={filters.genre} placeholder="Genre" />
-          <input className="field" name="country" defaultValue={filters.country} placeholder="Country" />
+          <input className="field" name="country" defaultValue={country} placeholder="Country" />
+        </div>
+        <div className="flex flex-wrap gap-2">
+          {chips.map((chip) => {
+            const params = new URLSearchParams();
+            if (filters.q) params.set("q", filters.q);
+            if (filters.genre) params.set("genre", filters.genre);
+            if (chip.value) params.set("country", chip.value);
+            const href = params.toString() ? `/search?${params}` : "/search?country=";
+            const active = country === chip.value;
+            return (
+              <Link
+                key={chip.label}
+                href={href}
+                className={active ? "gold-btn px-3 py-1 text-xs" : "ghost-btn px-3 py-1 text-xs"}
+              >
+                {chip.label}
+              </Link>
+            );
+          })}
         </div>
         <button className="gold-btn w-full py-3">Search</button>
       </form>
