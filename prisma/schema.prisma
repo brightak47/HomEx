@@ -1,0 +1,299 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         String   @default("VIEWER")
+  imageUrl     String?
+  country      String?
+  suspended    Boolean  @default(false)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  producerProfile  ProducerProfile?
+  celebrityProfile CelebrityProfile?
+  tickets          Ticket[]
+  orders           Order[]
+  savedPremieres   SavedPremiere[]
+  notifications    Notification[]
+  deviceSessions   DeviceSession[]
+  playbackSessions PlaybackSession[]
+  chatMessages     ChatMessage[]
+  reactions        Reaction[]
+  auditLogs        AuditLog[]
+  premieres        Premiere[]        @relation("ProducerPremieres")
+}
+
+model ProducerProfile {
+  id         String  @id @default(cuid())
+  userId     String  @unique
+  studioName String
+  bio        String?
+  country    String?
+  user       User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model CelebrityProfile {
+  id          String             @id @default(cuid())
+  userId      String             @unique
+  displayName String
+  bio         String?
+  knownFor    String?
+  user        User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invitations GuestInvitation[]
+}
+
+model Movie {
+  id             String       @id @default(cuid())
+  title          String
+  description    String
+  genre          String
+  runtimeMinutes Int
+  posterUrl      String
+  trailerUrl     String
+  movieAssetUrl  String
+  muxAssetId     String?
+  director       String
+  country        String       @default("US")
+  createdAt      DateTime     @default(now())
+  premieres      Premiere[]
+  castMembers    CastMember[]
+}
+
+model Premiere {
+  id                 String   @id @default(cuid())
+  producerId         String
+  movieId            String
+  status             String   @default("DRAFT")
+  scheduledAt        DateTime
+  timezone           String   @default("America/New_York")
+  durationMinutes    Int
+  preShowMinutes     Int      @default(20)
+  ticketPriceCents   Int
+  currency           String   @default("USD")
+  showAttendeeCount  Boolean  @default(true)
+  publishedAt        DateTime?
+  playbackStartedAt  DateTime?
+  playbackPositionMs Int      @default(0)
+  isPaused           Boolean  @default(false)
+  phase              String   @default("PRE_SHOW")
+  suspended          Boolean  @default(false)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  producer         User              @relation("ProducerPremieres", fields: [producerId], references: [id])
+  movie            Movie             @relation(fields: [movieId], references: [id], onDelete: Cascade)
+  invitations      GuestInvitation[]
+  tickets          Ticket[]
+  orders           Order[]
+  sessions         PremiereSession[]
+  playbackSessions PlaybackSession[]
+  chatMessages     ChatMessage[]
+  reactions        Reaction[]
+  savedBy          SavedPremiere[]
+  transactions     Transaction[]
+  notifications    Notification[]
+}
+
+model CastMember {
+  id       String  @id @default(cuid())
+  movieId  String
+  name     String
+  role     String
+  imageUrl String?
+  movie    Movie   @relation(fields: [movieId], references: [id], onDelete: Cascade)
+}
+
+model GuestInvitation {
+  id                 String            @id @default(cuid())
+  premiereId         String
+  email              String
+  name               String
+  guestRole          String
+  token              String            @unique
+  status             String            @default("PENDING")
+  celebrityProfileId String?
+  createdAt          DateTime          @default(now())
+  premiere           Premiere          @relation(fields: [premiereId], references: [id], onDelete: Cascade)
+  celebrityProfile   CelebrityProfile? @relation(fields: [celebrityProfileId], references: [id])
+}
+
+model Ticket {
+  id                    String             @id @default(cuid())
+  userId                String
+  premiereId            String
+  orderId               String
+  paymentId             String?
+  priceCents            Int
+  commissionCents       Int
+  producerEarningsCents Int
+  status                String             @default("PAID")
+  purchasedAt           DateTime           @default(now())
+  user                  User               @relation(fields: [userId], references: [id])
+  premiere              Premiere           @relation(fields: [premiereId], references: [id])
+  order                 Order              @relation(fields: [orderId], references: [id])
+  playbackSessions      PlaybackSession[]
+  transactions          Transaction[]
+}
+
+model Order {
+  id          String   @id @default(cuid())
+  userId      String
+  premiereId  String
+  status      String   @default("PENDING")
+  totalCents  Int
+  currency    String   @default("USD")
+  provider    String
+  providerRef String?
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
+  premiere    Premiere @relation(fields: [premiereId], references: [id])
+  tickets     Ticket[]
+  payments    Payment[]
+}
+
+model Payment {
+  id          String   @id @default(cuid())
+  orderId     String
+  provider    String
+  providerRef String?
+  amountCents Int
+  currency    String   @default("USD")
+  status      String
+  rawPayload  String?
+  createdAt   DateTime @default(now())
+  order       Order    @relation(fields: [orderId], references: [id])
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  type        String
+  amountCents Int
+  currency    String   @default("USD")
+  premiereId  String?
+  ticketId    String?
+  producerId  String?
+  note        String?
+  createdAt   DateTime @default(now())
+  premiere    Premiere? @relation(fields: [premiereId], references: [id])
+  ticket      Ticket?   @relation(fields: [ticketId], references: [id])
+}
+
+model PlatformSettings {
+  id                    String   @id @default("global")
+  commissionType        String   @default("PERCENTAGE")
+  percentageBps         Int      @default(1000)
+  fixedFeeCents         Int      @default(100)
+  minFeeCents           Int      @default(0)
+  currency              String   @default("USD")
+  maxConcurrentStreams  Int      @default(1)
+  terminatePriorSession Boolean  @default(true)
+  updatedAt             DateTime @updatedAt
+}
+
+model ProducerPayout {
+  id          String   @id @default(cuid())
+  producerId  String
+  amountCents Int
+  currency    String   @default("USD")
+  status      String   @default("PENDING")
+  periodStart DateTime
+  periodEnd   DateTime
+  createdAt   DateTime @default(now())
+}
+
+model PremiereSession {
+  id                 String    @id @default(cuid())
+  premiereId         String
+  startedAt          DateTime  @default(now())
+  endedAt            DateTime?
+  officialPositionMs Int       @default(0)
+  premiere           Premiere  @relation(fields: [premiereId], references: [id], onDelete: Cascade)
+}
+
+model PlaybackSession {
+  id            String    @id @default(cuid())
+  userId        String
+  ticketId      String
+  premiereId    String
+  deviceId      String
+  watermarkSeed String
+  startedAt     DateTime  @default(now())
+  lastHeartbeat DateTime  @default(now())
+  endedAt       DateTime?
+  endReason     String?
+  user          User      @relation(fields: [userId], references: [id])
+  ticket        Ticket    @relation(fields: [ticketId], references: [id])
+  premiere      Premiere  @relation(fields: [premiereId], references: [id])
+}
+
+model DeviceSession {
+  id        String   @id @default(cuid())
+  userId    String
+  deviceId  String
+  userAgent String?
+  lastSeen  DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id])
+}
+
+model ChatMessage {
+  id         String   @id @default(cuid())
+  premiereId String
+  userId     String
+  body       String
+  createdAt  DateTime @default(now())
+  premiere   Premiere @relation(fields: [premiereId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model Reaction {
+  id         String   @id @default(cuid())
+  premiereId String
+  userId     String
+  emoji      String
+  createdAt  DateTime @default(now())
+  premiere   Premiere @relation(fields: [premiereId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id])
+}
+
+model Notification {
+  id         String   @id @default(cuid())
+  userId     String
+  type       String
+  title      String
+  body       String
+  read       Boolean  @default(false)
+  premiereId String?
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  premiere   Premiere? @relation(fields: [premiereId], references: [id])
+}
+
+model SavedPremiere {
+  userId     String
+  premiereId String
+  createdAt  DateTime @default(now())
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  premiere   Premiere @relation(fields: [premiereId], references: [id], onDelete: Cascade)
+
+  @@id([userId, premiereId])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  actorId   String?
+  action    String
+  target    String?
+  meta      String?
+  createdAt DateTime @default(now())
+  actor     User?    @relation(fields: [actorId], references: [id])
+}

@@ -1,0 +1,26 @@
+export type PremiereCard = {
+  id: string;
+  status: string;
+  phase: string;
+  scheduledAt: string;
+  timezone: string;
+  durationMinutes: number;
+  ticketPriceCents: number;
+  currency: string;
+  attendeeCount: number | null;
+  title: string;
+  description: string;
+  genre: string;
+  runtimeMinutes: number;
+  posterUrl: string;
+  trailerUrl: string;
+  director: string;
+  country: string;
+  studioName: string;
+  producerName: string;
+  cast: { id: string; name: string; role: string; imageUrl: string | null }[];
+  guests: { name: string; guestRole: string; status: string }[];
+  ticketStatus: string | null;
+  canBuy: boolean;
+  canJoin: boolean;
+};
