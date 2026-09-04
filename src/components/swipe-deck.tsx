@@ -178,6 +178,7 @@ export function SwipeDeck({ premieres }: { premieres: PremiereCard[] }) {
               poster={current.posterUrl}
               title={current.title}
               autoPlay
+              muted
               controls
               className="aspect-video w-full border-0 bg-black"
             />
