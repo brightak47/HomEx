@@ -137,13 +137,16 @@ export function PremiereRoom({
 
   return (
     <div className="relative min-h-[100dvh] bg-black">
-      <div className="relative aspect-[16/10] w-full overflow-hidden bg-black">
+      <div className="relative min-h-[240px] w-full overflow-hidden bg-black aspect-video">
         {movieOn ? (
           <video
             ref={videoRef}
             src={join.playback.playbackUrl}
+            poster={posterUrl}
             className="h-full w-full object-cover"
             playsInline
+            muted
+            autoPlay
             controls={false}
             disablePictureInPicture
             controlsList="nodownload noplaybackrate"

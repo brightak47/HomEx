@@ -3,7 +3,8 @@ import { notFound, redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { getPremiereForUser } from "@/lib/premieres";
 import { PhoneShell } from "@/components/shell";
-import { Countdown, formatShowtime } from "@/components/countdown";
+import { Countdown } from "@/components/countdown";
+import { formatShowtime } from "@/lib/datetime";
 
 export default async function TicketConfirmedPage({
   params,

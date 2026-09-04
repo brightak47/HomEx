@@ -110,6 +110,15 @@ export function jsonError(error: unknown, fallback = 400) {
     typeof error === "object" && error && "status" in error
       ? Number((error as { status: number }).status)
       : fallback;
+  if (
+    typeof error === "object" &&
+    error &&
+    "issues" in error &&
+    Array.isArray((error as { issues: { message?: string }[] }).issues)
+  ) {
+    const first = (error as { issues: { message?: string }[] }).issues[0];
+    return Response.json({ error: first?.message || "Invalid request" }, { status });
+  }
   const message = error instanceof Error ? error.message : "Request failed";
   return Response.json({ error: message }, { status });
 }

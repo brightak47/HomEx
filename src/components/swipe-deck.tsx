@@ -3,7 +3,8 @@
 import { useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Countdown, formatShowtime } from "./countdown";
+import { Countdown } from "./countdown";
+import { formatShowtime } from "@/lib/datetime";
 import { formatMoney } from "@/lib/money";
 import { api } from "@/lib/api";
 import type { PremiereCard } from "@/lib/types";
