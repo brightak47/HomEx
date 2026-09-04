@@ -29,16 +29,16 @@ npm run db:seed
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000).
+Open [http://localhost:3100](http://localhost:3100). HomEx uses **3100** so it does not collide with other apps on 3000.
 
 ### Cursor browser
 
-HomEx listens on port **3000** and is declared in `.cursor/environment.json` plus `.vscode/settings.json` so Cursor can forward it into Simple Browser.
+HomEx listens on port **3100** and is declared in `.cursor/environment.json` plus `.vscode/settings.json` so Cursor can forward it into Simple Browser.
 
 1. Keep the agent (or a local `npm run dev`) running.
 2. Open the **Ports** panel (plug icon in the editor).
-3. Confirm **3000 / HomEx** is forwarded.
-4. Click **Open in Browser** (or Command Palette → “Simple Browser: Show” → `http://localhost:3000`).
+3. Confirm **3100 / HomEx** is forwarded.
+4. Click **Open in Browser** (or Command Palette → “Simple Browser: Show” → `http://localhost:3100`).
 
 If you see `ERR_CONNECTION_REFUSED`, the preview is hitting your laptop instead of the forwarded agent port. Use the Ports panel link, not a separately typed localhost URL.
 

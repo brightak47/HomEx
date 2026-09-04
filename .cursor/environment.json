@@ -6,13 +6,13 @@
     {
       "name": "HomEx",
       "command": "npm run dev",
-      "description": "HomEx Next.js app on port 3000 for the Cursor browser"
+      "description": "HomEx Next.js app on port 3100 for the Cursor browser"
     }
   ],
   "ports": [
     {
       "name": "HomEx",
-      "port": 3000
+      "port": 3100
     }
   ]
 }

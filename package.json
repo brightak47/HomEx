@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack --hostname 0.0.0.0 --port 3000",
+    "dev": "next dev --turbopack --hostname 0.0.0.0 --port 3100",
     "build": "prisma generate && next build",
-    "start": "next start --hostname 0.0.0.0 --port 3000",
+    "start": "next start --hostname 0.0.0.0 --port 3100",
     "lint": "eslint",
     "postinstall": "prisma generate",
     "db:push": "prisma db push",

@@ -2,7 +2,7 @@
   "remote.autoForwardPorts": true,
   "remote.autoForwardPortsSource": "hybrid",
   "remote.portsAttributes": {
-    "3000": {
+    "3100": {
       "label": "HomEx",
       "protocol": "http",
       "onAutoForward": "openBrowser",
