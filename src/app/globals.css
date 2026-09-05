@@ -1,0 +1,144 @@
+@import "tailwindcss";
+
+:root {
+  --bg: #070709;
+  --bg-elevated: #121218;
+  --gold: #d4af37;
+  --gold-soft: #e8d5a3;
+  --cream: #f6f0e6;
+  --muted: #9a9288;
+  --line: rgba(246, 240, 230, 0.12);
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-elevated: var(--bg-elevated);
+  --color-gold: var(--gold);
+  --color-gold-soft: var(--gold-soft);
+  --color-cream: var(--cream);
+  --color-muted: var(--muted);
+  --font-sans: var(--font-outfit);
+  --font-display: var(--font-cinzel);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  background: #050506;
+  color: var(--cream);
+}
+
+body {
+  font-family: var(--font-outfit), sans-serif;
+  margin: 0;
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.phone-shell {
+  width: min(430px, 100%);
+  min-height: 100dvh;
+  margin: 0 auto;
+  background: var(--bg);
+  position: relative;
+  overflow: hidden;
+}
+
+@media (min-width: 768px) {
+  body {
+    background:
+      radial-gradient(circle at 20% 10%, rgba(212, 175, 55, 0.08), transparent 28%),
+      #050506;
+  }
+
+  .phone-shell {
+    min-height: 100dvh;
+    box-shadow: 0 0 0 1px rgba(246, 240, 230, 0.06), 0 30px 80px rgba(0, 0, 0, 0.55);
+  }
+}
+
+.wide-shell {
+  width: min(980px, 100%);
+  min-height: 100dvh;
+  margin: 0 auto;
+  background: var(--bg);
+  padding: 24px 20px 96px;
+}
+
+.display {
+  font-family: var(--font-cinzel), serif;
+  letter-spacing: 0.08em;
+}
+
+.gold-btn {
+  background: linear-gradient(180deg, #ead48a 0%, #d4af37 48%, #a9841d 100%);
+  color: #1a1408;
+  font-weight: 650;
+  border: 0;
+  border-radius: 999px;
+}
+
+.ghost-btn {
+  background: rgba(7, 7, 9, 0.45);
+  color: var(--cream);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  backdrop-filter: blur(12px);
+}
+
+.field {
+  width: 100%;
+  border: 1px solid var(--line);
+  background: rgba(18, 18, 24, 0.88);
+  color: var(--cream);
+  border-radius: 16px;
+  padding: 14px 16px;
+  outline: none;
+}
+
+.field:focus {
+  border-color: rgba(212, 175, 55, 0.7);
+}
+
+.hide-scroll {
+  scrollbar-width: none;
+}
+
+.hide-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #e85d4c;
+  box-shadow: 0 0 0 0 rgba(232, 93, 76, 0.7);
+  animation: pulse 1.6s infinite;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(232, 93, 76, 0.55);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(232, 93, 76, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(232, 93, 76, 0);
+  }
+}
